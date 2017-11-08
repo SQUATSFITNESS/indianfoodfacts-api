@@ -90,19 +90,6 @@ app.get("/api/anyfood", function(req, res) {
         });
 });
 
-
-
-
-// All calls here after need authorization
-
-let credentials = {};
-credentials[process.env.ADMIN_USERNAME] = [process.env.ADMIN_PASSWORD];
-console.log('Authorizing ', credentials);
-
-app.use(basicAuth({
-    users: credentials
-}))
-
 app.post("/api/food", function(req, res) {
     var food = req.body.food;
     console.log(food);
@@ -117,6 +104,16 @@ app.post("/api/food", function(req, res) {
         }
     });
 });
+
+// All calls here after need authorization
+
+let credentials = {};
+credentials[process.env.ADMIN_USERNAME] = [process.env.ADMIN_PASSWORD];
+console.log('Authorizing ', credentials);
+
+app.use(basicAuth({
+    users: credentials
+}))
 
 app.delete("/api/food/:id", function(req, res) {
     var id = req.params.id;
