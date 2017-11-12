@@ -105,27 +105,22 @@ app.post("/api/food", function(req, res) {
     });
 });
 
-// All calls here after need authorization
-
-let credentials = {};
-credentials[process.env.ADMIN_USERNAME] = [process.env.ADMIN_PASSWORD];
-console.log('Authorizing ', credentials);
-
-app.use(basicAuth({
-    users: credentials
-}))
-
 app.delete("/api/food/:id", function(req, res) {
     var id = req.params.id;
     console.log('Food to be deleted', id);
-    db.collection(FOOD_COLLECTION).remove({_id: new ObjectId(id)}, function(err, doc) {
+    db.collection(FOOD_COLLECTION).update({_id: new ObjectId(id)}, { $inc: { removeCount: 1 }}, function(err, doc) {
         if (err) {
-            handleError(res, err.message, "Failed to delete food item: ", id);
+            handleError(res, err.message, "Failed to get food item: ", id);
         } else {
             if (doc === null) {
                 doc = {};
+                handleError(res, err.message, "Food item is empty: ", id);
+                return;
             }
-            res.status(200).json(doc);
+
+            var removeCount = doc.removeCount || 0;
+            doc.removeCount = removeCount++;
+
         }
     });
 });
