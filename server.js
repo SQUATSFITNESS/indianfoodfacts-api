@@ -50,7 +50,13 @@ app.get("/api/food/:name", function(req, res) {
     var limit = Number(req.query.limit || 1);
 
     if(limit === 1) {
-        db.collection(FOOD_COLLECTION).findOne({"name": {"$regex": foodName, "$options": "i"}}, function(err, doc) {
+        db.collection(FOOD_COLLECTION).findOne({ $and: [ 
+            {"name": {"$regex": foodName, "$options": "i"}}, 
+            { $or: [
+                {"removeCount" : { "$exists" : false }}, 
+                {"removeCount": { $lt: 20 }}
+                ]}
+        ]}, function(err, doc) {
             if (err) {
                 handleError(res, err.message, "Failed to get contact");
             } else {
@@ -61,7 +67,13 @@ app.get("/api/food/:name", function(req, res) {
             }
         });
     } else {
-        db.collection(FOOD_COLLECTION).find({"name": {"$regex": foodName, "$options": "i"}}).limit(limit).toArray(function(err, doc) {
+        db.collection(FOOD_COLLECTION).find({ $and: [ 
+            {"name": {"$regex": foodName, "$options": "i"}}, 
+            { $or: [
+                {"removeCount" : { "$exists" : false }}, 
+                {"removeCount": { $lt: 20 }}
+                ]}
+        ]}).limit(limit).toArray(function(err, doc) {
             if (err) {
                 handleError(res, err.message, "Failed to get food");
             } else {
