@@ -118,9 +118,7 @@ app.delete("/api/food/:id", function(req, res) {
                 return;
             }
 
-            var removeCount = doc.removeCount || 0;
-            doc.removeCount = removeCount++;
-
+            res.status(200).json(doc);
         }
     });
 });
