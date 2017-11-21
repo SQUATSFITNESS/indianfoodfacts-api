@@ -49,6 +49,10 @@ app.get("/api/food/:name", function(req, res) {
     var foodName = req.params.name;
     var limit = Number(req.query.limit || 1);
 
+    if(limit > 50) {
+        limit = 50;
+    }
+
     if(limit === 1) {
         db.collection(FOOD_COLLECTION).findOne({ $and: [ 
             {"name": {"$regex": foodName, "$options": "i"}}, 
