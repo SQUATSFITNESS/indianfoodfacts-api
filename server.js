@@ -1,20 +1,23 @@
 var express = require("express");
 var bodyParser = require("body-parser");
+var multer = require("multer");
 var mongodb = require("mongodb");
 var ObjectId = mongodb.ObjectId;
 var cors = require('cors');
 var basicAuth = require('express-basic-auth')
 
 var FOOD_COLLECTION = "foods";
+var RECIPE_COLLECTION = "recipe";
 
 var app = express();
 app.use(cors());
 app.use(bodyParser.json());
+var upload = multer();
 
 // Create a database variable outside of the database connection callback to reuse the connection pool in your app.
 var db;
 
-// Connect to the database before starting the application server.
+// Connect to the database before starting the application server. 
 mongodb.MongoClient.connect(process.env.MONGODB_URI, function(err, database) {
     if (err) {
         console.log(err);
@@ -31,6 +34,7 @@ mongodb.MongoClient.connect(process.env.MONGODB_URI, function(err, database) {
         console.log("App now running on port", port);
     });
 });
+
 
 // FOOD API ROUTES BELOW
 
@@ -139,3 +143,22 @@ app.delete("/api/food/:id", function(req, res) {
     });
 });
 
+app.post("/api/recipe", upload.any(), function (req, res, next) {
+    let formData = req.body; 
+    var recipeJSON = JSON.parse(formData.recipe);
+    
+    var recipe = {"Name" : recipeJSON.name, "Ingredients" : recipeJSON.Ingredients, "Procedure" : recipeJSON.Procedure,
+    "Picture" : req.files[0], "Duration" : recipeJSON.Duration, "Category" : recipeJSON.Category, "Quantity" : recipeJSON.Quantity,
+    "Carbs" : recipeJSON.Carbs, "Protien" : recipeJSON.Protien, "Fats" : recipeJSON.Fats, "Calories" : recipeJSON.Calories };
+    
+    db.collection(RECIPE_COLLECTION).insert(recipe, function(err, doc) {
+        if (err) {
+            handleError(res, err.message, "Failed to add food item");
+        } else {
+            if (doc === null) {
+                doc = {};
+            }
+            res.status(200).json(doc);
+        }
+    });
+});
